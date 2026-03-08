@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Blockforge Demo</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="./dist/block-forge.css" />
+</head>
+
+<body>
+  <h1>Welcome to Block Forge</h1>
+
+  <div style="max-width:820px; margin:40px auto; padding:0 20px 80px;">
+    <div id="editor-container"></div>
+  </div>
+
+  <!-- Global toast container (one per page) -->
+  <div class="be-toast-box" id="be-global-toasts"></div>
+
+  <script src="./dist/block-forge.umd.js"></script>
+    <script>
+        const editor = new BlockEditor("#editor-container");
+
+        editor.onSave((block) => {
+            console.log("Block id    ::", block.id);
+            console.log("Block type  ::", block.type);
+            console.log("Block order ::", block.order);
+            console.log("Block label ::", block.label);
+            console.log("Block output::", block.content);
+        });
+
+        editor.onSaveAll((blocks) => {
+            console.log("All blocks ::", blocks);
+        });
+
+        editor.load([
+            {
+                id: 123,
+                type:    "text",
+                label:   "Introduction",
+                content: "<h2>Welcome to Block Forge</h2><p>Start editing or add a new block below.</p>",
+            },
+            {
+                id: 456,
+                type:     "code",
+                label:    "Example",
+                language: "javascript",
+                content:  `console.log("Hello from Block Forge!");`,
+            },
+        ]);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,56 @@
+.be-text-body .ql-toolbar {
+    border: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    background: #fdfcfa;
+    padding: 6px 12px;
+}
+
+.be-text-body .ql-container {
+    border: none !important;
+}
+
+.be-text-body .ql-editor {
+    min-height: 120px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--text-primary);
+    padding: 16px 18px;
+    line-height: 1.75;
+}
+
+.be-text-body .ql-editor.ql-blank::before {
+    color: var(--text-ghost);
+    font-style: normal;
+    font-size: 14px;
+}
+
+.ql-snow .ql-stroke {
+    stroke: var(--text-secondary) !important;
+}
+
+.ql-snow .ql-fill {
+    fill: var(--text-secondary) !important;
+}
+
+.ql-snow .ql-picker {
+    color: var(--text-secondary) !important;
+}
+
+.ql-snow .ql-picker-options {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+}
+
+.ql-toolbar.ql-snow button:hover .ql-stroke,
+.ql-toolbar.ql-snow button.ql-active .ql-stroke {
+    stroke: var(--accent) !important;
+}
+
+.ql-toolbar.ql-snow button:hover .ql-fill,
+.ql-toolbar.ql-snow button.ql-active .ql-fill {
+    fill: var(--accent) !important;
+}
+
+.ql-toolbar.ql-snow .ql-picker-label:hover {
+    color: var(--accent) !important;
+}

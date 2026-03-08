@@ -1,0 +1,36 @@
+.be-code-body {
+    position: relative;
+}
+
+.CodeMirror {
+    height: auto !important;
+    min-height: 120px;
+    background: #fefefe !important;
+    color: #24292e !important;
+    font-family: var(--font-mono) !important;
+    font-size: 13.5px !important;
+    line-height: 1.65 !important;
+    border-radius: 0 0 calc(var(--radius) - 1.5px) calc(var(--radius) - 1.5px);
+}
+
+.CodeMirror-scroll {
+    min-height: 120px;
+}
+
+.CodeMirror-gutters {
+    background: #f6f8fa !important;
+    border-right: 1px solid var(--border) !important;
+}
+
+.CodeMirror-linenumber {
+    color: var(--text-ghost) !important;
+    padding: 0 12px 0 10px;
+}
+
+.CodeMirror-cursor {
+    border-left: 2px solid var(--accent) !important;
+}
+
+.CodeMirror-selected {
+    background: rgba(45, 106, 79, 0.1) !important;
+    }

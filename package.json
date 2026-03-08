@@ -1,15 +1,36 @@
 {
   "name": "@bhaswanth53/block-forge",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "./dist/block-editor.umd.js",
+  "module": "./dist/block-editor.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build",
+    "dev": "vite"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/block-editor.js",
+      "require": "./dist/block-editor.umd.js"
+    },
+    "./css": "./dist/block-editor.css"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "description": "",
   "devDependencies": {
-    "laravel-mix": "^6.0.49"
+    "resolve-url-loader": "^5.0.0",
+    "sass": "^1.97.3",
+    "sass-loader": "^12.6.0",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "codemirror": "^5.65.16",
+    "highlight.js": "^11.11.1",
+    "quill": "^1.3.7",
+    "sortablejs": "^1.15.7"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
