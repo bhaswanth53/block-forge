@@ -1,35 +1,48 @@
 {
   "name": "@bhaswanth53/block-forge",
-  "version": "0.0.1",
-  "main": "./dist/block-editor.umd.js",
-  "module": "./dist/block-editor.js",
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite"
-  },
+  "version": "0.0.2",
+
+  "main":   "./dist/block-forge.umd.js",
+  "module": "./dist/block-forge.js",
+  "style":  "./dist/block-forge.css",
+
   "exports": {
     ".": {
-      "import": "./dist/block-editor.js",
-      "require": "./dist/block-editor.umd.js"
+      "import":  "./dist/block-forge.js",
+      "require": "./dist/block-forge.umd.js",
+      "default": "./dist/block-forge.umd.js"
     },
-    "./css": "./dist/block-editor.css"
+    "./css": "./dist/block-forge.css"
   },
+
+  "files": [
+    "dist"
+  ],
+
+  "scripts": {
+    "build": "vite build",
+    "dev":   "vite"
+  },
+
   "keywords": [],
   "author": "",
   "license": "MIT",
   "description": "",
+
   "devDependencies": {
     "resolve-url-loader": "^5.0.0",
-    "sass": "^1.97.3",
-    "sass-loader": "^12.6.0",
-    "vite": "^7.3.1"
+    "sass":               "^1.97.3",
+    "sass-loader":        "^12.6.0",
+    "vite":               "^7.3.1"
   },
+
   "dependencies": {
-    "codemirror": "^5.65.16",
+    "codemirror":  "^5.65.16",
     "highlight.js": "^11.11.1",
-    "quill": "^1.3.7",
-    "sortablejs": "^1.15.7"
+    "quill":       "^1.3.7",
+    "sortablejs":  "^1.15.7"
   },
+
   "publishConfig": {
     "access": "public"
   }
