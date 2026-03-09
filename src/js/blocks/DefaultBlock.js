@@ -35,14 +35,14 @@ export default class DefaultBlock {
                 <div class="be-block-controls">
                     <span class="be-save-status" data-action="status" data-id="${id}"></span>
 
-                    <button class="be-icon-btn" data-action="preview" data-id="${id}" title="Toggle output preview">
+                    <button type="button" class="be-icon-btn" data-action="preview" data-id="${id}" title="Toggle output preview">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                             <circle cx="12" cy="12" r="3"/>
                         </svg>
                     </button>
 
-                    <button class="be-icon-btn btn-save" data-action="save" data-id="${id}" title="Save this block">
+                    <button type="button" class="be-icon-btn btn-save" data-action="save" data-id="${id}" title="Save this block">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
                             <polyline points="17,21 17,13 7,13 7,21"/>
@@ -50,7 +50,7 @@ export default class DefaultBlock {
                         </svg>
                     </button>
 
-                    <button class="be-icon-btn btn-delete" data-action="delete" data-id="${id}" title="Delete this block">
+                    <button type="button" class="be-icon-btn btn-delete" data-action="delete" data-id="${id}" title="Delete this block">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3,6 5,6 21,6"/>
                             <path d="M19,6l-1,14a2,2,0,01-2,2H8a2,2,0,01-2-2L5,6"/>
@@ -73,7 +73,7 @@ export default class DefaultBlock {
             <div class="be-preview-panel" data-preview-panel="${id}">
                 <div class="be-preview-header">
                     <span>output preview</span>
-                    <button class="be-icon-btn" data-action="preview" data-id="${id}" title="Close" style="width:18px;height:18px;font-size:11px">✕</button>
+                    <button type="button" class="be-icon-btn" data-action="preview" data-id="${id}" title="Close" style="width:18px;height:18px;font-size:11px">✕</button>
                 </div>
                 <div class="be-preview-content" data-preview-content="${id}"></div>
             </div>

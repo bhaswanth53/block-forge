@@ -8701,7 +8701,7 @@ function Ei() {
       function ie(e, t, i) {
         t || (t = {});
         for (var r in e)
-          e.hasOwnProperty(r) && (i !== !1 || !t.hasOwnProperty(r)) && (t[r] = e[r]);
+          Object.prototype.hasOwnProperty.call(e, r) && (i !== !1 || !Object.prototype.hasOwnProperty.call(t, r)) && (t[r] = e[r]);
         return t;
       }
       function ae(e, t, i, r, a) {
@@ -11176,7 +11176,7 @@ b`.split(/\n/).length != 3 ? function(e) {
           "position: relative; outline: none"
         );
         var u = K("div", [a.lineSpace], "CodeMirror-lines");
-        a.mover = A("div", [u], null, "position: relative"), a.sizer = A("div", [a.mover], "CodeMirror-sizer"), a.sizerWidth = null, a.heightForcer = A("div", null, null, "position: absolute; height: " + we + "px; width: 1px;"), a.gutters = A("div", null, "CodeMirror-gutters"), a.lineGutter = null, a.scroller = A("div", [a.sizer, a.heightForcer, a.gutters], "CodeMirror-scroll"), a.scroller.setAttribute("tabIndex", "-1"), a.wrapper = A("div", [a.scrollbarFiller, a.gutterFiller, a.scroller], "CodeMirror"), d && p >= 105 && (a.wrapper.style.clipPath = "inset(0px)"), a.wrapper.setAttribute("translate", "no"), E && h < 8 && (a.gutters.style.zIndex = -1, a.scroller.style.paddingRight = 0), !f && !(l && y) && (a.scroller.draggable = !0), e && (e.appendChild ? e.appendChild(a.wrapper) : e(a.wrapper)), a.viewFrom = a.viewTo = t.first, a.reportedViewFrom = a.reportedViewTo = t.first, a.view = [], a.renderedView = null, a.externalMeasured = null, a.viewOffset = 0, a.lastWrapHeight = a.lastWrapWidth = 0, a.updateLineNumbers = null, a.nativeBarWidth = a.barHeight = a.barWidth = 0, a.scrollbarsClipped = !1, a.lineNumWidth = a.lineNumInnerWidth = a.lineNumChars = null, a.alignWidgets = !1, a.cachedCharWidth = a.cachedTextHeight = a.cachedPaddingH = null, a.maxLine = null, a.maxLineLength = 0, a.maxLineChanged = !1, a.wheelDX = a.wheelDY = a.wheelStartX = a.wheelStartY = null, a.shift = !1, a.selForContextMenu = null, a.activeTouch = null, a.gutterSpecs = vo(r.gutters, r.lineNumbers), Cd(a), i.init(a);
+        a.mover = A("div", [u], null, "position: relative"), a.sizer = A("div", [a.mover], "CodeMirror-sizer"), a.sizerWidth = null, a.heightForcer = A("div", null, null, "position: absolute; height: " + we + "px; width: 1px;"), a.gutters = A("div", null, "CodeMirror-gutters"), a.lineGutter = null, a.scroller = A("div", [a.sizer, a.heightForcer, a.gutters], "CodeMirror-scroll"), a.scroller.setAttribute("tabIndex", "-1"), a.wrapper = A("div", [a.scrollbarFiller, a.gutterFiller, a.scroller], "CodeMirror"), d && p === 105 && (a.wrapper.style.clipPath = "inset(0px)"), a.wrapper.setAttribute("translate", "no"), E && h < 8 && (a.gutters.style.zIndex = -1, a.scroller.style.paddingRight = 0), !f && !(l && y) && (a.scroller.draggable = !0), e && (e.appendChild ? e.appendChild(a.wrapper) : e(a.wrapper)), a.viewFrom = a.viewTo = t.first, a.reportedViewFrom = a.reportedViewTo = t.first, a.view = [], a.renderedView = null, a.externalMeasured = null, a.viewOffset = 0, a.lastWrapHeight = a.lastWrapWidth = 0, a.updateLineNumbers = null, a.nativeBarWidth = a.barHeight = a.barWidth = 0, a.scrollbarsClipped = !1, a.lineNumWidth = a.lineNumInnerWidth = a.lineNumChars = null, a.alignWidgets = !1, a.cachedCharWidth = a.cachedTextHeight = a.cachedPaddingH = null, a.maxLine = null, a.maxLineLength = 0, a.maxLineChanged = !1, a.wheelDX = a.wheelDY = a.wheelStartX = a.wheelStartY = null, a.shift = !1, a.selForContextMenu = null, a.activeTouch = null, a.gutterSpecs = vo(r.gutters, r.lineNumbers), Cd(a), i.init(a);
       }
       var Ea = 0, or = null;
       E ? or = -0.53 : l ? or = 15 : d ? or = -0.7 : S && (or = -1 / 3);
@@ -14702,7 +14702,7 @@ b`.split(/\n/).length != 3 ? function(e) {
         Ct.prototype[e] = t;
       }, Ct.defineDocExtension = function(e, t) {
         _n.prototype[e] = t;
-      }, Ct.fromTextArea = Lh, Mh(Ct), Ct.version = "5.65.16", Ct;
+      }, Ct.fromTextArea = Lh, Mh(Ct), Ct.version = "5.65.21", Ct;
     }));
   })(Ga)), Ga.exports;
 }
@@ -63882,21 +63882,21 @@ class $T {
                 <span class="be-block-count" id="be-count-${n}">0 blocks</span>
             </div>
             <div class="be-toolbar-right">
-                <button class="be-btn be-btn-outline" id="be-export-${n}">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="7,10 12,15 17,10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Export
+                <button type="button" class="be-btn be-btn-outline" id="be-export-${n}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export
                 </button>
-                <button class="be-btn be-btn-primary" id="be-saveall-${n}">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
-                    <polyline points="17,21 17,13 7,13 7,21"/>
-                    <polyline points="7,3 7,8 15,8"/>
-                </svg>
-                Save All
+                <button type="button" class="be-btn be-btn-primary" id="be-saveall-${n}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                        <polyline points="17,21 17,13 7,13 7,21"/>
+                        <polyline points="7,3 7,8 15,8"/>
+                    </svg>
+                    Save All
                 </button>
             </div>
         `;
@@ -63905,13 +63905,13 @@ class $T {
 class XT {
   static getHtml() {
     return `
-            <button class="be-add-btn add-text">
+            <button type="button" class="be-add-btn add-text">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                     <path d="M4 6h16M4 12h16M4 18h7"/>
                 </svg>
                 Text Block
             </button>
-            <button class="be-add-btn add-code">
+            <button type="button" class="be-add-btn add-code">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                     <polyline points="16,18 22,12 16,6"/>
                     <polyline points="8,6 2,12 8,18"/>
@@ -63987,14 +63987,14 @@ class ZT {
                 <div class="be-block-controls">
                     <span class="be-save-status" data-action="status" data-id="${o}"></span>
 
-                    <button class="be-icon-btn" data-action="preview" data-id="${o}" title="Toggle output preview">
+                    <button type="button" class="be-icon-btn" data-action="preview" data-id="${o}" title="Toggle output preview">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                             <circle cx="12" cy="12" r="3"/>
                         </svg>
                     </button>
 
-                    <button class="be-icon-btn btn-save" data-action="save" data-id="${o}" title="Save this block">
+                    <button type="button" class="be-icon-btn btn-save" data-action="save" data-id="${o}" title="Save this block">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
                             <polyline points="17,21 17,13 7,13 7,21"/>
@@ -64002,7 +64002,7 @@ class ZT {
                         </svg>
                     </button>
 
-                    <button class="be-icon-btn btn-delete" data-action="delete" data-id="${o}" title="Delete this block">
+                    <button type="button" class="be-icon-btn btn-delete" data-action="delete" data-id="${o}" title="Delete this block">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3,6 5,6 21,6"/>
                             <path d="M19,6l-1,14a2,2,0,01-2,2H8a2,2,0,01-2-2L5,6"/>
@@ -64022,7 +64022,7 @@ class ZT {
             <div class="be-preview-panel" data-preview-panel="${o}">
                 <div class="be-preview-header">
                     <span>output preview</span>
-                    <button class="be-icon-btn" data-action="preview" data-id="${o}" title="Close" style="width:18px;height:18px;font-size:11px">✕</button>
+                    <button type="button" class="be-icon-btn" data-action="preview" data-id="${o}" title="Close" style="width:18px;height:18px;font-size:11px">✕</button>
                 </div>
                 <div class="be-preview-content" data-preview-content="${o}"></div>
             </div>
