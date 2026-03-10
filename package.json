@@ -1,6 +1,6 @@
 {
   "name": "@bhaswanth53/block-forge",
-  "version": "0.0.3",
+  "version": "0.0.4",
 
   "main":   "./dist/block-forge.umd.js",
   "module": "./dist/block-forge.js",
@@ -34,6 +34,11 @@
     "sass":               "^1.97.3",
     "sass-loader":        "^12.6.0",
     "vite":               "^7.3.1"
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bhaswanth53/block-forge"
   },
 
   "dependencies": {

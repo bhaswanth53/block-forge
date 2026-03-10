@@ -64068,12 +64068,25 @@ class ry {
   }
   load(n) {
     return n.forEach((o) => {
-      const s = this._insertBlock(o.type, o.language || "javascript", o.label || "", Number(o.id) || null);
+      const s = this._insertBlock(
+        o.type,
+        o.language || "javascript",
+        o.label || "",
+        Number(o.id) || null
+      );
       setTimeout(() => {
-        if (o.content && (o.type === "text" && s.quill && s.quill.clipboard.dangerouslyPasteHTML(o.content), o.type === "code" && s.cm)) {
-          const l = o.content.replace(/<[^>]*>/g, "");
-          s.cm.setValue(l);
-        }
+        const l = o.raw ?? o.content;
+        if (l)
+          switch (o.type) {
+            case "text": {
+              s.quill && s.quill.clipboard.dangerouslyPasteHTML(l);
+              break;
+            }
+            case "code": {
+              s.cm && s.cm.setValue(l);
+              break;
+            }
+          }
       }, 80);
     }), this;
   }
@@ -64083,7 +64096,9 @@ class ry {
       type: s.type,
       order: l + 1,
       label: this._readLabel(s.id),
-      content: this._buildHtmlOutput(s)
+      language: s.type === "code" ? s.language : null,
+      content: this._buildHtmlOutput(s),
+      raw: this._buildRawOutput(s)
     }));
   }
   _buildShell() {
@@ -64198,7 +64213,9 @@ class ry {
       type: o.type,
       order: this._getBlockOrder(n),
       label: this._readLabel(n),
-      content: this._buildHtmlOutput(o)
+      language: o.type === "code" ? o.language : null,
+      content: this._buildHtmlOutput(o),
+      raw: this._buildRawOutput(o)
     };
     return this._setStatus(n, "saved"), this.listEl.querySelector(`[data-preview-panel="${n}"]`)?.classList.contains("is-open") && this._writePreviewContent(n, s.content), this._onSaveCallback && this._onSaveCallback(s), this._toast(`Block #${n} saved`), s;
   }
@@ -64251,23 +64268,36 @@ ${l.content}`
     s && (s.innerHTML = o);
   }
   _buildHtmlOutput(n) {
-    if (n.type === "text")
-      return n.quill ? n.quill.root.innerHTML : "";
-    if (n.type === "code") {
-      if (!n.cm) return "";
-      const o = n.cm.getValue(), s = n.language || "plaintext";
-      let l;
-      try {
-        l = s === "plaintext" ? Nu.highlightAuto(o).value : Nu.highlight(o, {
-          language: this._mapToHljsLang(s),
-          ignoreIllegals: !0
-        }).value;
-      } catch {
-        l = Nu.highlightAuto(o).value;
+    switch (n.type) {
+      case "text":
+        return n.quill ? n.quill.root.innerHTML : "";
+      case "code": {
+        if (!n.cm) return "";
+        const o = n.cm.getValue(), s = n.language || "plaintext";
+        let l;
+        try {
+          l = s === "plaintext" ? Nu.highlightAuto(o).value : Nu.highlight(o, {
+            language: this._mapToHljsLang(s),
+            ignoreIllegals: !0
+          }).value;
+        } catch {
+          l = Nu.highlightAuto(o).value;
+        }
+        return jT.getHtml({ lang: s, highlighted: l });
       }
-      return jT.getHtml({ lang: s, highlighted: l });
+      default:
+        return "";
     }
-    return "";
+  }
+  _buildRawOutput(n) {
+    switch (n.type) {
+      case "text":
+        return n.quill ? n.quill.root.innerHTML : "";
+      case "code":
+        return n.cm ? n.cm.getValue() : "";
+      default:
+        return "";
+    }
   }
   _mapToHljsLang(n) {
     return {

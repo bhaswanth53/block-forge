@@ -6,10 +6,153 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="./dist/block-forge.css" />
+
+  <style>
+    /* ── Output panel layout ──────────────────────────────────────── */
+  .forge-output-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 1320px;
+    margin: 24px auto;
+    padding: 0 20px 80px;
+  }
+
+  @media (max-width: 860px) {
+    .forge-output-wrap { grid-template-columns: 1fr; }
+  }
+
+  .forge-panel {
+    border: 1.5px solid #e2ddd6;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .forge-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #faf9f6;
+    border-bottom: 1px solid #e2ddd6;
+    flex-shrink: 0;
+  }
+
+  .forge-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: #1a1814;
+    letter-spacing: 0.3px;
+  }
+
+  .forge-panel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-html { background: #2d6a4f; }
+  .dot-raw  { background: #9b3a3a; }
+
+  .forge-copy-btn {
+    padding: 3px 10px;
+    border-radius: 5px;
+    border: 1px solid #cec8be;
+    background: transparent;
+    font-size: 11px;
+    font-family: sans-serif;
+    color: #6b6560;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .forge-copy-btn:hover    { background: #f5f3ee; color: #1a1814; }
+  .forge-copy-btn.copied   { border-color: #2d6a4f; color: #2d6a4f; background: #e8f4ee; }
+
+  .forge-panel-body {
+    padding: 16px;
+    overflow-y: auto;
+    max-height: 480px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
+  /* HTML panel — renders actual HTML */
+  #html-output { color: #1a1814; }
+
+  /* Raw JSON panel */
+  #raw-output { padding: 0; background: #1e1e2e; }
+
+  #raw-output-pre {
+    margin: 0;
+    padding: 16px;
+    font-family: 'DM Mono', 'Fira Code', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #cdd6f4;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* JSON syntax colouring */
+  #raw-output-pre .json-key     { color: #89b4fa; }
+  #raw-output-pre .json-string  { color: #a6e3a1; }
+  #raw-output-pre .json-number  { color: #fab387; }
+  #raw-output-pre .json-null    { color: #f38ba8; }
+  #raw-output-pre .json-bool    { color: #cba6f7; }
+
+  /* Empty state */
+  .forge-panel-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #b5b0a8;
+    font-size: 13px;
+    font-family: sans-serif;
+  }
+  </style>
+
 </head>
 
 <body>
   <h1>Welcome to Block Forge</h1>
+
+  <!-- Output panels — place after your editor div -->
+  <div class="forge-output-wrap">
+
+    <!-- HTML Output -->
+    <div class="forge-panel">
+      <div class="forge-panel-header">
+        <div class="forge-panel-title">
+          <span class="forge-panel-dot dot-html"></span>
+          HTML Output
+        </div>
+        <button class="forge-copy-btn" onclick="copyPanel('html')">Copy</button>
+      </div>
+      <div class="forge-panel-body" id="html-output"></div>
+    </div>
+
+    <!-- Raw JSON Output -->
+    <div class="forge-panel">
+      <div class="forge-panel-header">
+        <div class="forge-panel-title">
+          <span class="forge-panel-dot dot-raw"></span>
+          Raw JSON
+        </div>
+        <button class="forge-copy-btn" onclick="copyPanel('raw')">Copy</button>
+      </div>
+      <div class="forge-panel-body" id="raw-output">
+        <pre id="raw-output-pre"></pre>
+      </div>
+    </div>
+
+  </div>
 
   <div style="max-width:820px; margin:40px auto; padding:0 20px 80px;">
     <div id="editor-container"></div>
@@ -21,17 +164,16 @@
   <script src="./dist/block-forge.umd.js"></script>
     <script>
         const editor = new BlockEditor("#editor-container");
+        const htmlOutput = document.getElementById("html-output");
+        const rawOutput = document.getElementById("raw-output");
 
         editor.onSave((block) => {
-            console.log("Block id    ::", block.id);
-            console.log("Block type  ::", block.type);
-            console.log("Block order ::", block.order);
-            console.log("Block label ::", block.label);
-            console.log("Block output::", block.content);
+          const current = editor.getAll();
+          renderOutputPanels(current);
         });
 
         editor.onSaveAll((blocks) => {
-            console.log("All blocks ::", blocks);
+          renderOutputPanels(blocks);
         });
 
         editor.load([
@@ -49,6 +191,94 @@
                 content:  `console.log("Hello from Block Forge!");`,
             },
         ]);
+
+        function renderOutputPanels(blocks) {
+          renderHtmlPanel(blocks);
+          renderRawPanel(blocks);
+        }
+
+        function renderHtmlPanel(blocks) {
+          const el = document.getElementById('html-output');
+          if (!blocks.length) {
+            el.innerHTML = '<div class="forge-panel-empty">No blocks saved yet.</div>';
+            return;
+          }
+          el.innerHTML = blocks.map((block, i) => `
+            <div style="margin-bottom:${i < blocks.length - 1 ? '16px' : '0'}">
+              <div style="font-size:10px;font-family:monospace;color:#b5b0a8;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">
+                Block ${block.order} · ${block.type}${block.language ? ' · ' + block.language : ''} ${block.label ? '· ' + block.label : ''}
+              </div>
+              <pre style="margin:0;padding:12px 14px;background:#f6f8fa;border:1px solid #e2ddd6;border-radius:6px;overflow-x:auto;"><code style="font-family:'DM Mono',monospace;font-size:12.5px;line-height:1.7;color:#1a1814;white-space:pre;">${escapeHtml(block.content)}</code></pre>
+              ${i < blocks.length - 1 ? '<hr style="border:none;border-top:1px solid #e2ddd6;margin-top:16px;">' : ''}
+            </div>
+          `).join('');
+        }
+
+        function escapeHtml(str) {
+          return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        }
+
+        function renderRawPanel(blocks) {
+          const pre = document.getElementById('raw-output-pre');
+          if (!blocks.length) {
+            pre.innerHTML = '<span style="color:#6c7086">// No blocks saved yet.</span>';
+            return;
+          }
+          // Build raw JSON — swap content for raw field for display
+          const display = blocks.map(b => ({
+            id:       b.id,
+            type:     b.type,
+            order:    b.order,
+            label:    b.label,
+            language: b.language,
+            content:  b.content,
+            raw:      b.raw,
+          }));
+          pre.innerHTML = syntaxHighlight(JSON.stringify(display, null, 2));
+        }
+
+        // Syntax-highlights a JSON string with coloured spans
+        function syntaxHighlight(json) {
+          return json.replace(
+            /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+            (match) => {
+              let cls = 'json-number';
+              if (/^"/.test(match)) {
+                cls = /:$/.test(match) ? 'json-key' : 'json-string';
+              } else if (/true|false/.test(match)) {
+                cls = 'json-bool';
+              } else if (/null/.test(match)) {
+                cls = 'json-null';
+              }
+              return `<span class="${cls}">${match}</span>`;
+            }
+          );
+        }
+
+        // Copy button handler
+        function copyPanel(type) {
+          const btn = event.currentTarget;
+          let text;
+
+          if (type === 'html') {
+            text = document.getElementById('html-output').innerHTML;
+          } else {
+            text = document.getElementById('raw-output-pre').innerText;
+          }
+
+          navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+              btn.textContent = 'Copy';
+              btn.classList.remove('copied');
+            }, 2000);
+          });
+        }
     </script>
 </body>
 

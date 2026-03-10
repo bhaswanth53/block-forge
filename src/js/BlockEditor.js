@@ -38,15 +38,34 @@ export default class BlockEditor {
 
     load(blockArray) {
         blockArray.forEach((item) => {
-            const block = this._insertBlock(item.type, item.language || 'javascript', item.label || '', Number(item.id) || null);
+            const block = this._insertBlock(
+                item.type, 
+                item.language || 'javascript', 
+                item.label || '', 
+                Number(item.id) || null
+            );
+
             setTimeout(() => {
-                if(!item.content) return;
-                if(item.type === 'text' && block.quill) {
-                    block.quill.clipboard.dangerouslyPasteHTML(item.content);
-                }
-                if(item.type === 'code' && block.cm) {
-                    const plainCode = item.content.replace(/<[^>]*>/g, '');
-                    block.cm.setValue(plainCode);
+                const source = item.raw ?? item.content;
+                if (!source) return;
+
+                switch (item.type) {
+                    case "text": {
+                        if (block.quill) {
+                            block.quill.clipboard.dangerouslyPasteHTML(source);
+                        }
+                        break;
+                    }
+
+                    case "code": {
+                        if (block.cm) {
+                            block.cm.setValue(source);
+                        }
+                        break;
+                    }
+
+                    default:
+                        break;
                 }
             }, 80);
         });
@@ -61,7 +80,9 @@ export default class BlockEditor {
                 type: block.type,
                 order: index + 1,
                 label: this._readLabel(block.id),
-                content: this._buildHtmlOutput(block)
+                language: block.type === "code" ? block.language : null,
+                content: this._buildHtmlOutput(block),
+                raw: this._buildRawOutput(block)
             };
         });
         return allBlocks;
@@ -115,11 +136,11 @@ export default class BlockEditor {
         const block = this._insertBlock(type, 'javascript', '');
 
         setTimeout(() => {
-            if(type === 'text' && block.quill) {
+            if (type === 'text' && block.quill) {
                 block.quill.focus();
             }
 
-            if(type === 'code' && block.cm) {
+            if (type === 'code' && block.cm) {
                 block.cm.focus();
             }
         }, 120);
@@ -129,7 +150,7 @@ export default class BlockEditor {
 
     _insertBlock(type, language, label, id = null) {
         let blockId = id;
-        if(id === null) {
+        if (id === null) {
             blockId = ++this.idCounter;
         }
         const block = {
@@ -137,7 +158,7 @@ export default class BlockEditor {
             type,
             language,
             quill: null,
-            cm:null
+            cm: null
         };
         this.blocks.push(block);
 
@@ -145,7 +166,7 @@ export default class BlockEditor {
         this.listEl.appendChild(el);
 
         setTimeout(() => {
-            if(type === 'text') {
+            if (type === 'text') {
                 this._mountQuill(block, el);
             } else {
                 this._mountCodeMirror(block, el);
@@ -179,35 +200,35 @@ export default class BlockEditor {
     _wireBlockEvents(el) {
         el.addEventListener("click", (e) => {
             const btn = e.target.closest("[data-action]");
-            if(!btn) return;
+            if (!btn) return;
 
             const action = btn.dataset.action;
             const id = Number(btn.dataset.id);
 
-            if(action === "save") {
+            if (action === "save") {
                 this._handleSave(id);
             }
 
-            if(action === "delete") {
+            if (action === "delete") {
                 this._handleDelete(id);
             }
 
-            if(action === "preview") {
+            if (action === "preview") {
                 this.handleTogglePreview(id);
             }
         });
 
         el.addEventListener("change", (e) => {
             const sel = e.target.closest('[data-action="lang"]');
-            if(!sel) return;
+            if (!sel) return;
 
             const id = Number(sel.dataset.id);
             const block = this._findBlock(id);
-            if(!block) return;
+            if (!block) return;
 
             block.language = sel.value;
             const langDef = LANGUAGES.find(l => l.value === block.language);
-            if(block.cm) {
+            if (block.cm) {
                 block.cm.setOption("mode", langDef?.cmMode || null);
             }
             this._markChanged(id);
@@ -216,7 +237,7 @@ export default class BlockEditor {
 
     _mountQuill(block, el) {
         const mountPoint = el.querySelector(`[data-quill="${block.id}"]`);
-        if(!mountPoint) return;
+        if (!mountPoint) return;
 
         block.quill = new Quill(mountPoint, {
             theme: 'snow',
@@ -251,7 +272,7 @@ export default class BlockEditor {
 
     _mountCodeMirror(block, el) {
         const textarea = el.querySelector(`[data-cm="${block.id}"]`);
-        if(!textarea) return;
+        if (!textarea) return;
 
         const langDef = LANGUAGES.find(l => l.value === block.language);
 
@@ -271,24 +292,26 @@ export default class BlockEditor {
 
     _handleSave(id) {
         const block = this._findBlock(id);
-        if(!block) return;
+        if (!block) return;
 
         const result = {
             id: id,
             type: block.type,
             order: this._getBlockOrder(id),
             label: this._readLabel(id),
-            content: this._buildHtmlOutput(block)
+            language: block.type === "code" ? block.language : null,
+            content: this._buildHtmlOutput(block),
+            raw: this._buildRawOutput(block)
         };
 
         this._setStatus(id, "saved");
 
         const previewPanel = this.listEl.querySelector(`[data-preview-panel="${id}"]`);
-        if(previewPanel?.classList.contains("is-open")) {
+        if (previewPanel?.classList.contains("is-open")) {
             this._writePreviewContent(id, result.content);
         }
 
-        if(this._onSaveCallback) {
+        if (this._onSaveCallback) {
             this._onSaveCallback(result);
         }
 
@@ -297,7 +320,7 @@ export default class BlockEditor {
     }
 
     _handleSaveAll() {
-        if(this.blocks.length === 0) {
+        if (this.blocks.length === 0) {
             this._toast("No blocks to save");
             return;
         }
@@ -305,7 +328,7 @@ export default class BlockEditor {
         const allBlocks = this.getAll();
         allBlocks.forEach(b => this._setStatus(b.id, "saved"));
 
-        if(this._onSaveAllCallback) {
+        if (this._onSaveAllCallback) {
             this._onSaveAllCallback(allBlocks);
         }
 
@@ -314,7 +337,7 @@ export default class BlockEditor {
     }
 
     _handleExport() {
-        if(this.blocks.length === 0) {
+        if (this.blocks.length === 0) {
             this._toast("Nothing to export");
             return;
         }
@@ -338,12 +361,12 @@ export default class BlockEditor {
 
     _handleDelete(id) {
         const idx = this.blocks.findIndex(b => b.id === id);
-        if(idx === -1) return;
+        if (idx === -1) return;
 
         this.blocks.splice(idx, 1);
 
         const el = this.listEl.querySelector(`[data-block-id="${id}"]`);
-        if(el) {
+        if (el) {
             el.style.cssText = 'opacity:0; transform:scale(0.97); transition:all 0.15s ease;';
             setTimeout(() => {
                 el.remove();
@@ -355,12 +378,12 @@ export default class BlockEditor {
 
     _handleTogglePreview(id) {
         const panel = this.listEl.querySelector(`[data-preview-panel="${id}"]`);
-        if(!panel) return;
+        if (!panel) return;
 
         const nowOpen = !panel.classList.contains("is-open");
         panel.classList.toggle("is-open", nowOpen);
 
-        if(nowOpen) {
+        if (nowOpen) {
             const block = this._findBlock(id);
             const content = this._buildHtmlOutput(block);
             this._writePreviewContent(id, content);
@@ -369,38 +392,54 @@ export default class BlockEditor {
 
     _writePreviewContent(id, html) {
         const target = this.listEl.querySelector(`[data-preview-content="${id}"]`);
-        if(target) {
+        if (target) {
             target.innerHTML = html;
         }
     }
 
     _buildHtmlOutput(block) {
-        if(block.type === "text") {
-            return block.quill ? block.quill.root.innerHTML : "";
-        }
-
-        if(block.type === "code") {
-            if(!block.cm) return "";
-
-            const rawCode = block.cm.getValue();
-            const lang = block.language || "plaintext";
-
-            let highlighted;
-            try {
-                highlighted = (lang === "plaintext")
-                    ? hljs.highlightAuto(rawCode).value
-                    : hljs.highlight(rawCode, {
-                        language: this._mapToHljsLang(lang),
-                        ignoreIllegals: true
-                    }).value;
-            } catch(_) {
-                highlighted = hljs.highlightAuto(rawCode).value;
+        switch (block.type) {
+            case "text": {
+                return block.quill ? block.quill.root.innerHTML : "";
             }
 
-            return Code.getHtml({ lang, highlighted });
-        }
+            case "code": {
+                if (!block.cm) return "";
 
-        return "";
+                const rawCode = block.cm.getValue();
+                const lang = block.language || "plaintext";
+
+                let highlighted;
+                try {
+                    highlighted = (lang === "plaintext")
+                        ? hljs.highlightAuto(rawCode).value
+                        : hljs.highlight(rawCode, {
+                            language: this._mapToHljsLang(lang),
+                            ignoreIllegals: true
+                        }).value;
+                } catch (_) {
+                    highlighted = hljs.highlightAuto(rawCode).value;
+                }
+
+                return Code.getHtml({ lang, highlighted });
+            }
+
+            default:
+                return "";
+        }
+    }
+
+    _buildRawOutput(block) {
+        switch (block.type) {
+            case 'text':
+                return block.quill ? block.quill.root.innerHTML : '';
+
+            case 'code':
+                return block.cm ? block.cm.getValue() : '';
+
+            default:
+                return '';
+        }
     }
 
     _mapToHljsLang(lang) {
@@ -415,7 +454,7 @@ export default class BlockEditor {
 
     _markChanged(id) {
         const el = this.listEl.querySelector(`[data-action="status"][data-id="${id}"]`);
-        if(!el) return;
+        if (!el) return;
 
         el.textContent = 'unsaved';
         el.className = 'be-save-status visible is-changed';
@@ -459,7 +498,7 @@ export default class BlockEditor {
 
     _showEmptyState() {
         this._removeEmptyState();
-        if(this.blocks.length === 0) {
+        if (this.blocks.length === 0) {
             const el = document.createElement('div');
             el.id = 'be-empty';
             el.className = 'be-empty';
