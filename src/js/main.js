@@ -1,12 +1,14 @@
-import "../css/main.scss";
+// ── Styles — order matters ─────────────────────────────────────────────────
+// Third-party CSS first, then our overrides on top
+import 'quill/dist/quill.snow.css';
+import 'codemirror/lib/codemirror.css';
+import '../css/main.scss';
 
-import BlockEditor from "./BlockEditor.js";
+// ── Register all custom elements ───────────────────────────────────────────
+import { BlockBase } from './BlockBase.js';
+import { TextBlock } from './TextBlock.js';
+import { CodeBlock } from './CodeBlock.js';
+import { Editor }    from './Editor.js';
 
-import "codemirror/lib/codemirror.css";
-
-import "codemirror/mode/javascript/javascript";
-import "codemirror/mode/htmlmixed/htmlmixed";
-import "codemirror/mode/css/css";
-import "codemirror/mode/shell/shell";
-
-export default BlockEditor;
+export { BlockBase, TextBlock, CodeBlock, Editor };
+export default Editor;

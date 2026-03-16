@@ -1,0 +1,154 @@
+.be-block-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: var(--surface-raised);
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.be-drag-handle {
+    cursor: grab;
+    color: var(--text-ghost);
+    padding: 3px 4px;
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    transition: color 0.15s, background 0.15s;
+}
+
+.be-drag-handle:hover {
+    color: var(--text-secondary);
+    background: var(--border);
+}
+
+.be-drag-handle:active {
+    cursor: grabbing;
+}
+
+.be-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.badge-text {
+    background: var(--accent-muted);
+    color: var(--accent);
+    border: 1px solid rgba(45, 106, 79, 0.2);
+}
+
+.badge-code {
+    background: var(--code-muted);
+    color: var(--code-accent);
+    border: 1px solid rgba(155, 58, 58, 0.2);
+}
+
+.be-lang-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    border-radius: var(--radius-xs);
+    padding: 2px 7px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.be-lang-select:hover,
+.be-lang-select:focus {
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+}
+
+.be-label-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-family: var(--font-body);
+    min-width: 0;
+}
+
+.be-label-input::placeholder {
+    color: var(--text-ghost);
+}
+
+.be-label-input:focus {
+    color: var(--text-primary);
+}
+
+.be-block-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.be-save-status {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px 7px;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+}
+
+.be-save-status.visible {
+    opacity: 1;
+}
+
+.be-save-status.is-saved {
+    color: var(--accent);
+    background: var(--accent-light);
+}
+
+.be-save-status.is-changed {
+    color: var(--yellow);
+    background: var(--yellow-light);
+}
+
+.be-icon-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--text-ghost);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: all 0.14s;
+    flex-shrink: 0;
+}
+
+.be-icon-btn:hover {
+    background: var(--border);
+    color: var(--text-primary);
+}
+
+.be-icon-btn.btn-save:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.be-icon-btn.btn-delete:hover {
+    background: #fdecea;
+    color: #c0392b;
+}

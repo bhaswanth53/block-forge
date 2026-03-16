@@ -1,14 +1,753 @@
-@use "./_imports.scss";
-@use "./_vars.scss";
-@use "./_toolbar.scss";
-@use "./_buttons.scss";
-@use "./_block-strip.scss";
-@use "./_empty-state.scss";
-@use "./_block-wrapper.scss";
-@use "./_block-header.scss";
-@use "./_quill.scss";
-@use "./_code-block.scss";
-@use "./_output-preview.scss";
-@use "./_code-preview.scss";
-@use "./_typography.scss";
-@use "./_toast.scss";
+// ============================================================
+// BlockForge — main.scss
+// Covers: CSS variables, block shell, text-block, code-block,
+//         block-editor toolbar, add strip, empty state,
+//         Quill overrides, CodeMirror overrides, sortable,
+//         toasts, prv-cb preview, responsive.
+// ============================================================
+
+// ── Variables ─────────────────────────────────────────────────────────────
+
+:root {
+  // Surfaces
+  --bf-bg:             #f7f6f2;
+  --bf-surface:        #ffffff;
+  --bf-surface-raised: #f9f8f5;
+
+  // Borders
+  --bf-border:         #e8e4dc;
+  --bf-border-strong:  #d4cfc5;
+
+  // Text
+  --bf-text-primary:   #1c1917;
+  --bf-text-secondary: #6b6560;
+  --bf-text-ghost:     #b0aca4;
+
+  // Accent (green — text blocks, save, active states)
+  --bf-accent:         #18794e;
+  --bf-accent-dark:    #0f6b44;
+  --bf-accent-light:   #edf7f1;
+  --bf-accent-muted:   rgba(24, 121, 78, 0.12);
+
+  // Code accent (rust — code blocks)
+  --bf-code-accent:    #b5460f;
+  --bf-code-light:     #fdf3ee;
+  --bf-code-muted:     rgba(181, 70, 15, 0.1);
+
+  // Status
+  --bf-yellow:         #a16207;
+  --bf-yellow-light:   #fefce8;
+  --bf-red:            #c0392b;
+  --bf-red-light:      #fdecea;
+
+  // Typography
+  --bf-font-body:      'Geist', system-ui, -apple-system, sans-serif;
+  --bf-font-mono:      'Geist Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  // Radii
+  --bf-radius:         10px;
+  --bf-radius-sm:      6px;
+  --bf-radius-xs:      4px;
+
+  // Shadows
+  --bf-shadow:         0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+  --bf-shadow-focus:   0 0 0 3px rgba(24, 121, 78, 0.18);
+
+  // Transitions
+  --bf-transition:     0.14s ease;
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────
+
+block-editor,
+text-block,
+code-block {
+  display: block;
+  font-family: var(--bf-font-body);
+  font-size: 14px;
+  color: var(--bf-text-primary);
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+// ── Block shell ───────────────────────────────────────────────────────────
+
+.bf-block {
+  background:    var(--bf-surface);
+  border:        1.5px solid var(--bf-border);
+  border-radius: var(--bf-radius);
+  box-shadow:    var(--bf-shadow);
+  margin-bottom: 10px;
+  transition:    border-color var(--bf-transition), box-shadow var(--bf-transition);
+  animation:     bf-block-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow:      hidden;
+
+  &:hover {
+    border-color: var(--bf-border-strong);
+  }
+
+  &.is-editing {
+    border-color: var(--bf-accent);
+    box-shadow:   var(--bf-shadow-focus);
+  }
+}
+
+@keyframes bf-block-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+// ── Block header ──────────────────────────────────────────────────────────
+
+.bf-block-header {
+  display:       flex;
+  align-items:   center;
+  gap:           8px;
+  padding:       9px 12px;
+  background:    var(--bf-surface-raised);
+  border-bottom: 1px solid var(--bf-border);
+  border-radius: var(--bf-radius) var(--bf-radius) 0 0;
+}
+
+// ── Drag handle ───────────────────────────────────────────────────────────
+
+.bf-drag-handle {
+  cursor:      grab;
+  color:       var(--bf-text-ghost);
+  padding:     3px 4px;
+  border-radius: var(--bf-radius-xs);
+  display:     flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition:  color var(--bf-transition), background var(--bf-transition);
+
+  svg { display: block; }
+
+  &:hover {
+    color:      var(--bf-text-secondary);
+    background: var(--bf-border);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+// ── Type badge ────────────────────────────────────────────────────────────
+
+.bf-type-badge {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            4px;
+  padding:        2px 8px;
+  border-radius:  20px;
+  font-size:      10px;
+  font-weight:    700;
+  font-family:    var(--bf-font-mono);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  flex-shrink:    0;
+  user-select:    none;
+}
+
+.badge-text {
+  background: var(--bf-accent-muted);
+  color:      var(--bf-accent);
+  border:     1px solid rgba(24, 121, 78, 0.2);
+}
+
+.badge-code {
+  background: var(--bf-code-muted);
+  color:      var(--bf-code-accent);
+  border:     1px solid rgba(181, 70, 15, 0.2);
+}
+
+// ── Language select ───────────────────────────────────────────────────────
+
+.bf-lang-select {
+  background:    var(--bf-surface);
+  border:        1px solid var(--bf-border);
+  color:         var(--bf-text-secondary);
+  font-size:     12px;
+  font-family:   var(--bf-font-mono);
+  border-radius: var(--bf-radius-xs);
+  padding:       2px 7px;
+  cursor:        pointer;
+  outline:       none;
+  transition:    border-color var(--bf-transition), color var(--bf-transition);
+  flex-shrink:   0;
+
+  &:hover,
+  &:focus {
+    border-color: var(--bf-border-strong);
+    color:        var(--bf-text-primary);
+  }
+}
+
+// ── Label input ───────────────────────────────────────────────────────────
+
+.bf-label-input {
+  flex:        1;
+  background:  transparent;
+  border:      none;
+  outline:     none;
+  color:       var(--bf-text-secondary);
+  font-size:   13px;
+  font-family: var(--bf-font-body);
+  min-width:   0;
+  transition:  color var(--bf-transition);
+
+  &::placeholder { color: var(--bf-text-ghost); }
+  &:focus         { color: var(--bf-text-primary); }
+}
+
+// ── Block controls ────────────────────────────────────────────────────────
+
+.bf-block-controls {
+  display:     flex;
+  align-items: center;
+  gap:         3px;
+  flex-shrink: 0;
+}
+
+// ── Save status badge ─────────────────────────────────────────────────────
+
+.bf-save-status {
+  font-size:      10px;
+  font-family:    var(--bf-font-mono);
+  padding:        2px 7px;
+  border-radius:  3px;
+  opacity:        0;
+  transition:     opacity 0.25s;
+  pointer-events: none;
+  white-space:    nowrap;
+
+  &.visible   { opacity: 1; }
+
+  &.is-saved {
+    color:      var(--bf-accent);
+    background: var(--bf-accent-light);
+  }
+
+  &.is-changed {
+    color:      var(--bf-yellow);
+    background: var(--bf-yellow-light);
+  }
+}
+
+// ── Icon buttons ──────────────────────────────────────────────────────────
+
+.bf-icon-btn {
+  width:         28px;
+  height:        28px;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  border:        none;
+  background:    transparent;
+  color:         var(--bf-text-ghost);
+  border-radius: var(--bf-radius-xs);
+  cursor:        pointer;
+  transition:    all var(--bf-transition);
+  flex-shrink:   0;
+
+  svg { display: block; pointer-events: none; }
+
+  &:hover {
+    background: var(--bf-border);
+    color:      var(--bf-text-primary);
+  }
+
+  &.btn-edit:hover,
+  &.btn-preview:hover {
+    background: var(--bf-accent-light);
+    color:      var(--bf-accent);
+  }
+
+  &.btn-save:hover {
+    background: var(--bf-accent-light);
+    color:      var(--bf-accent);
+  }
+
+  &.btn-delete:hover {
+    background: var(--bf-red-light);
+    color:      var(--bf-red);
+  }
+}
+
+// ── Block body ────────────────────────────────────────────────────────────
+
+.bf-block-body {
+  position: relative;
+}
+
+// ── Preview mode — text ───────────────────────────────────────────────────
+
+.bf-preview-content {
+  padding:     16px 18px;
+  min-height:  56px;
+  line-height: 1.75;
+  color:       var(--bf-text-primary);
+  font-family: var(--bf-font-body);
+  font-size:   14px;
+}
+
+.bf-text-preview {
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 10px; line-height: 1.3; }
+  h2 { font-size: 18px; font-weight: 600; margin: 0 0 8px;  line-height: 1.35; }
+  h3 { font-size: 15px; font-weight: 500; margin: 0 0 6px;  line-height: 1.4; }
+
+  p  { margin: 0 0 8px; }
+  p:last-child { margin-bottom: 0; }
+
+  ul, ol { padding-left: 20px; margin: 0 0 8px; }
+  li { margin-bottom: 3px; }
+
+  strong { font-weight: 600; }
+  em     { font-style: italic; }
+
+  blockquote {
+    margin:      0 0 8px;
+    padding:     4px 0 4px 14px;
+    border-left: 3px solid var(--bf-border-strong);
+    color:       var(--bf-text-secondary);
+  }
+
+  a {
+    color:           var(--bf-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+// ── Empty hint ────────────────────────────────────────────────────────────
+
+.bf-empty-hint {
+  color:      var(--bf-text-ghost);
+  font-size:  13px;
+  font-style: italic;
+}
+
+// ── Preview mode — code (prv-cb) ─────────────────────────────────────────
+
+.prv-cb {
+  border:        1px solid #d0d7de;
+  border-radius: var(--bf-radius-sm);
+  overflow:      hidden;
+  background:    #f6f8fa;
+  font-family:   var(--bf-font-mono);
+  margin:        0;
+
+  .prv-cb-h {
+    background:    #eaeef2;
+    padding:       6px 14px;
+    border-bottom: 1px solid #d0d7de;
+
+    span {
+      font-size:   11px;
+      color:       #57606a;
+      font-family: var(--bf-font-mono);
+      font-weight: 500;
+      user-select: none;
+    }
+  }
+
+  pre {
+    margin:     0;
+    overflow-x: auto;
+  }
+
+  code {
+    display:     block;
+    padding:     12px 14px;
+    font-size:   12.5px;
+    line-height: 1.65;
+    background:  transparent;
+    font-family: var(--bf-font-mono);
+    color:       #1f2328;
+  }
+}
+
+// ── Edit mode — text (Quill) ──────────────────────────────────────────────
+
+.bf-text-body {
+  .ql-toolbar.ql-snow {
+    border:        none !important;
+    border-bottom: 1px solid var(--bf-border) !important;
+    background:    var(--bf-surface-raised);
+    padding:       6px 12px;
+    font-family:   var(--bf-font-body);
+  }
+
+  .ql-container.ql-snow {
+    border: none !important;
+  }
+
+  .ql-editor {
+    min-height:  120px;
+    font-family: var(--bf-font-body);
+    font-size:   14px;
+    color:       var(--bf-text-primary);
+    padding:     14px 18px;
+    line-height: 1.75;
+
+    &.ql-blank::before {
+      color:       var(--bf-text-ghost);
+      font-style:  normal;
+      font-size:   13px;
+    }
+
+    // Match preview heading sizes
+    h1 { font-size: 22px; font-weight: 600; }
+    h2 { font-size: 18px; font-weight: 600; }
+    h3 { font-size: 15px; font-weight: 500; }
+  }
+
+  // Quill toolbar icon tinting
+  .ql-snow .ql-stroke {
+    stroke: var(--bf-text-secondary) !important;
+  }
+  .ql-snow .ql-fill {
+    fill: var(--bf-text-secondary) !important;
+  }
+  .ql-snow .ql-picker {
+    color: var(--bf-text-secondary) !important;
+  }
+  .ql-snow .ql-picker-options {
+    background:   var(--bf-surface)  !important;
+    border-color: var(--bf-border)   !important;
+    border-radius: var(--bf-radius-sm);
+    box-shadow:   var(--bf-shadow);
+  }
+  .ql-toolbar.ql-snow button:hover .ql-stroke,
+  .ql-toolbar.ql-snow button.ql-active .ql-stroke {
+    stroke: var(--bf-accent) !important;
+  }
+  .ql-toolbar.ql-snow button:hover .ql-fill,
+  .ql-toolbar.ql-snow button.ql-active .ql-fill {
+    fill: var(--bf-accent) !important;
+  }
+  .ql-toolbar.ql-snow .ql-picker-label:hover,
+  .ql-toolbar.ql-snow .ql-picker-label.ql-active {
+    color: var(--bf-accent) !important;
+  }
+}
+
+// ── Edit mode — code (CodeMirror) ─────────────────────────────────────────
+
+.bf-code-body {
+  position: relative;
+
+  .CodeMirror {
+    height:      auto !important;
+    min-height:  120px;
+    background:  #fefefe !important;
+    font-family: var(--bf-font-mono) !important;
+    font-size:   13px !important;
+    line-height: 1.65 !important;
+    border-radius: 0 0 calc(var(--bf-radius) - 1.5px) calc(var(--bf-radius) - 1.5px);
+  }
+
+  .CodeMirror-scroll {
+    min-height: 120px;
+  }
+
+  .CodeMirror-gutters {
+    background:   #f6f8fa !important;
+    border-right: 1px solid var(--bf-border) !important;
+  }
+
+  .CodeMirror-linenumber {
+    color:   var(--bf-text-ghost) !important;
+    padding: 0 10px 0 8px;
+  }
+
+  .CodeMirror-cursor {
+    border-left: 2px solid var(--bf-accent) !important;
+  }
+
+  .CodeMirror-selectedtext,
+  .CodeMirror-selected {
+    background: rgba(24, 121, 78, 0.12) !important;
+  }
+
+  // Active line
+  .CodeMirror-activeline-background {
+    background: rgba(0, 0, 0, 0.025) !important;
+  }
+}
+
+// ── block-editor root ─────────────────────────────────────────────────────
+
+.bf-editor-root {
+  font-family: var(--bf-font-body);
+}
+
+// ── Editor toolbar ────────────────────────────────────────────────────────
+
+.bf-toolbar {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         10px 14px;
+  background:      var(--bf-surface);
+  border:          1px solid var(--bf-border);
+  border-radius:   var(--bf-radius);
+  margin-bottom:   14px;
+  box-shadow:      var(--bf-shadow);
+}
+
+.bf-brand-inner {
+  font-size:      15px;
+  font-weight:    600;
+  color:          var(--bf-text-primary);
+  letter-spacing: -0.3px;
+
+  span { color: var(--bf-accent); }
+}
+
+.bf-count {
+  font-size:     10px;
+  font-family:   var(--bf-font-mono);
+  color:         var(--bf-text-ghost);
+  background:    var(--bf-surface-raised);
+  border:        1px solid var(--bf-border);
+  border-radius: 20px;
+  padding:       2px 8px;
+}
+
+.bf-toolbar-right {
+  display: flex;
+  gap:     8px;
+}
+
+// ── Toolbar button ────────────────────────────────────────────────────────
+
+.bf-btn {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           6px;
+  padding:       6px 13px;
+  border-radius: var(--bf-radius-sm);
+  border:        1px solid transparent;
+  cursor:        pointer;
+  font-family:   var(--bf-font-body);
+  font-size:     12px;
+  font-weight:   500;
+  line-height:   1;
+  transition:    all var(--bf-transition);
+
+  svg { display: block; flex-shrink: 0; }
+}
+
+.bf-btn-ghost {
+  background:  transparent;
+  color:       var(--bf-text-secondary);
+  border-color: var(--bf-border-strong);
+
+  &:hover {
+    background: var(--bf-surface-raised);
+    color:      var(--bf-text-primary);
+  }
+}
+
+.bf-btn-primary {
+  background:  var(--bf-accent);
+  color:       #fff;
+  border-color: var(--bf-accent);
+
+  &:hover { background: var(--bf-accent-dark); }
+}
+
+// ── Blocks list ───────────────────────────────────────────────────────────
+
+.bf-blocks-list {
+  min-height: 24px;
+
+  // Ensure text-block and code-block display correctly in the list
+  text-block,
+  code-block {
+    display: block;
+  }
+}
+
+// ── Add block strip ───────────────────────────────────────────────────────
+
+.bf-add-strip {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+  margin-top:  14px;
+
+  &::before,
+  &::after {
+    content:    '';
+    flex:       1;
+    height:     1px;
+    background: var(--bf-border);
+  }
+}
+
+.bf-add-btn {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           6px;
+  padding:       6px 15px;
+  border-radius: 20px;
+  border:        1.5px dashed var(--bf-border-strong);
+  background:    var(--bf-surface);
+  cursor:        pointer;
+  font-family:   var(--bf-font-body);
+  font-size:     12px;
+  font-weight:   500;
+  color:         var(--bf-text-secondary);
+  transition:    all 0.16s ease;
+  white-space:   nowrap;
+
+  &:hover {
+    border-style: solid;
+  }
+}
+
+.bf-add-text:hover {
+  border-color: var(--bf-accent);
+  color:        var(--bf-accent);
+  background:   var(--bf-accent-light);
+}
+
+.bf-add-code:hover {
+  border-color: var(--bf-code-accent);
+  color:        var(--bf-code-accent);
+  background:   var(--bf-code-light);
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────
+
+.bf-empty {
+  text-align:  center;
+  padding:     52px 24px;
+  color:       var(--bf-text-ghost);
+  user-select: none;
+
+  h3 {
+    font-size:   15px;
+    font-weight: 500;
+    color:       var(--bf-text-secondary);
+    margin:      0 0 5px;
+  }
+
+  p {
+    font-size: 12px;
+    margin:    0;
+  }
+}
+
+// ── Sortable drag states ──────────────────────────────────────────────────
+
+.sortable-ghost {
+  opacity:    0.2;
+  background: var(--bf-accent-light);
+}
+
+.sortable-chosen {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  outline:    2px solid var(--bf-accent);
+  outline-offset: 0;
+}
+
+.sortable-drag {
+  opacity: 1 !important;
+}
+
+// ── Toast notifications ───────────────────────────────────────────────────
+
+#be-global-toasts {
+  position:        fixed;
+  bottom:          20px;
+  right:           20px;
+  display:         flex;
+  flex-direction:  column;
+  gap:             6px;
+  z-index:         9999;
+  pointer-events:  none;
+}
+
+.toast-item {
+  background:      var(--bf-surface);
+  border:          1px solid var(--bf-border-strong);
+  border-radius:   var(--bf-radius-sm);
+  padding:         8px 13px;
+  font-size:       12px;
+  font-family:     var(--bf-font-body);
+  display:         flex;
+  align-items:     center;
+  gap:             7px;
+  box-shadow:      var(--bf-shadow);
+  color:           var(--bf-text-primary);
+  pointer-events:  auto;
+  animation:       bf-toast-in 0.18s ease;
+
+  .toast-check {
+    color:       var(--bf-accent);
+    font-weight: 600;
+    font-size:   12px;
+    flex-shrink: 0;
+  }
+}
+
+@keyframes bf-toast-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+
+// ── Quill toolbar — kill native <select> arrows (the triangles) ───────────
+// Quill's Snow theme uses <select> elements in the toolbar for heading/font.
+// Without the Snow CSS they render as giant native browser dropdowns.
+// With Snow CSS loaded they're replaced by custom Quill pickers — but we
+// need this reset as a safety net in case of partial CSS loading.
+
+.ql-toolbar.ql-snow .ql-picker-label::before {
+  line-height: 1;
+}
+
+.ql-toolbar.ql-snow select {
+  display: none; // Quill replaces these with its own picker UI
+}
+
+// Quill picker expand arrow — override the default ▾ appearance
+.ql-snow .ql-picker-label svg {
+  width:    18px;
+  height:   18px;
+  position: relative;
+  top:      0;
+}
+
+// Ensure Quill editor area has a reasonable min-height
+.ql-container.ql-snow .ql-editor {
+  min-height: 100px;
+}
+
+// ── CodeMirror — ensure mount is visible immediately ─────────────────────
+// CodeMirror wraps the textarea in a div.CodeMirror after fromTextArea().
+// If the parent has no height, CM collapses to 0. Force it.
+
+.bf-cm-mount {
+  display: none; // textarea is hidden once CM wraps it — prevent flash
+}
+
+.bf-code-body .CodeMirror {
+  min-height: 120px !important;
+  height:     auto  !important;
+}
+
+// ── Preview content min-height — prevent collapsed empty blocks ───────────
+.bf-preview-content {
+  min-height: 48px;
+}

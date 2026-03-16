@@ -155,131 +155,16 @@
   </div>
 
   <div style="max-width:820px; margin:40px auto; padding:0 20px 80px;">
-    <div id="editor-container"></div>
+    <text-block block-id="42" content="<p>Standalone block</p>"></text-block>
+    <code-block block-id="43" language="python" content="print('hi')"></code-block>
+
+    <block-editor id="main"></block-editor>
   </div>
 
   <!-- Global toast container (one per page) -->
   <div class="be-toast-box" id="be-global-toasts"></div>
 
   <script src="./dist/block-forge.umd.js"></script>
-    <script>
-        const editor = new BlockEditor("#editor-container");
-        const htmlOutput = document.getElementById("html-output");
-        const rawOutput = document.getElementById("raw-output");
-
-        editor.onSave((block) => {
-          const current = editor.getAll();
-          renderOutputPanels(current);
-        });
-
-        editor.onSaveAll((blocks) => {
-          renderOutputPanels(blocks);
-        });
-
-        editor.load([
-            {
-                id: 123,
-                type:    "text",
-                label:   "Introduction",
-                content: "<h2>Welcome to Block Forge</h2><p>Start editing or add a new block below.</p>",
-            },
-            {
-                id: 456,
-                type:     "code",
-                label:    "Example",
-                language: "javascript",
-                content:  `console.log("Hello from Block Forge!");`,
-            },
-        ]);
-
-        function renderOutputPanels(blocks) {
-          renderHtmlPanel(blocks);
-          renderRawPanel(blocks);
-        }
-
-        function renderHtmlPanel(blocks) {
-          const el = document.getElementById('html-output');
-          if (!blocks.length) {
-            el.innerHTML = '<div class="forge-panel-empty">No blocks saved yet.</div>';
-            return;
-          }
-          el.innerHTML = blocks.map((block, i) => `
-            <div style="margin-bottom:${i < blocks.length - 1 ? '16px' : '0'}">
-              <div style="font-size:10px;font-family:monospace;color:#b5b0a8;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">
-                Block ${block.order} · ${block.type}${block.language ? ' · ' + block.language : ''} ${block.label ? '· ' + block.label : ''}
-              </div>
-              <pre style="margin:0;padding:12px 14px;background:#f6f8fa;border:1px solid #e2ddd6;border-radius:6px;overflow-x:auto;"><code style="font-family:'DM Mono',monospace;font-size:12.5px;line-height:1.7;color:#1a1814;white-space:pre;">${escapeHtml(block.content)}</code></pre>
-              ${i < blocks.length - 1 ? '<hr style="border:none;border-top:1px solid #e2ddd6;margin-top:16px;">' : ''}
-            </div>
-          `).join('');
-        }
-
-        function escapeHtml(str) {
-          return str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-        }
-
-        function renderRawPanel(blocks) {
-          const pre = document.getElementById('raw-output-pre');
-          if (!blocks.length) {
-            pre.innerHTML = '<span style="color:#6c7086">// No blocks saved yet.</span>';
-            return;
-          }
-          // Build raw JSON — swap content for raw field for display
-          const display = blocks.map(b => ({
-            id:       b.id,
-            type:     b.type,
-            order:    b.order,
-            label:    b.label,
-            language: b.language,
-            content:  b.content,
-            raw:      b.raw,
-          }));
-          pre.innerHTML = syntaxHighlight(JSON.stringify(display, null, 2));
-        }
-
-        // Syntax-highlights a JSON string with coloured spans
-        function syntaxHighlight(json) {
-          return json.replace(
-            /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
-            (match) => {
-              let cls = 'json-number';
-              if (/^"/.test(match)) {
-                cls = /:$/.test(match) ? 'json-key' : 'json-string';
-              } else if (/true|false/.test(match)) {
-                cls = 'json-bool';
-              } else if (/null/.test(match)) {
-                cls = 'json-null';
-              }
-              return `<span class="${cls}">${match}</span>`;
-            }
-          );
-        }
-
-        // Copy button handler
-        function copyPanel(type) {
-          const btn = event.currentTarget;
-          let text;
-
-          if (type === 'html') {
-            text = document.getElementById('html-output').innerHTML;
-          } else {
-            text = document.getElementById('raw-output-pre').innerText;
-          }
-
-          navigator.clipboard.writeText(text).then(() => {
-            btn.textContent = 'Copied!';
-            btn.classList.add('copied');
-            setTimeout(() => {
-              btn.textContent = 'Copy';
-              btn.classList.remove('copied');
-            }, 2000);
-          });
-        }
-    </script>
 </body>
 
 </html>

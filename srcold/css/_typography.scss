@@ -1,0 +1,23 @@
+.be-preview-content h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.be-preview-content h2 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 400;
+    margin-bottom: 8px;
+}
+
+.be-preview-content p {
+    margin-bottom: 8px;
+}
+
+.be-preview-content ul,
+.be-preview-content ol {
+    padding-left: 22px;
+    margin-bottom: 8px;
+}

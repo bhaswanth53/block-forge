@@ -1,0 +1,37 @@
+.be-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 13px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    line-height: 1;
+}
+
+.be-btn-outline {
+    background: transparent;
+    color: var(--text-secondary);
+    border-color: var(--border-strong);
+}
+
+.be-btn-outline:hover {
+    background: var(--surface-raised);
+    color: var(--text-primary);
+}
+
+.be-btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.be-btn-primary:hover {
+    background: #235c42;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(45, 106, 79, 0.3);
+}
